@@ -1,7 +1,8 @@
 const auditEventTransformer = require("../lib/auditEventTransformer")
 
 describe("auditEventTransformer", () => {
-  let assay1, assay2
+  let assay1
+  let assay2
 
   beforeEach(() => {
     assay1 = {
@@ -89,7 +90,7 @@ describe("auditEventTransformer", () => {
       date: "04-18-2024 3:47:2 pm",
       assay: {
         scientificName: "Gossypium hirsutum",
-        //TODO: how do we generate an audit event when assayId is assigned?
+        // TODO: how do we generate an audit event when assayId is assigned?
         // assayId: 756,
         markers: [
           {
@@ -317,7 +318,7 @@ describe("auditEventTransformer", () => {
 
   test("multiple top level fields change over different times", async () => {
     assay2.assay.technology = "SASI"
-    let assay3 = {}
+    const assay3 = {}
     assay3.assay = { ...assay2.assay }
     assay3.assay.scientificName = "spaghetti"
     assay3.date = "04-20-2024 4:41:2 pm"
@@ -486,7 +487,7 @@ describe("auditEventTransformer", () => {
   })
   test("handles deep nested changes across multiple iterations", async () => {
     delete assay2.assay.markers[0].alleles[0].primers[1]
-    let assay3 = {}
+    const assay3 = {}
     assay3.assay = JSON.parse(JSON.stringify(assay2.assay))
     assay3.date = "04-20-2024 4:41:2 pm"
     assay3.userId = "gkkqy"

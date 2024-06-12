@@ -15,7 +15,11 @@
     "type": "git",
     "url": "https://github.com/bayer-int/json-diff-audit.git"
   },
-  "keywords": ["json-diff-audit", "audit", "json-diff"],
+  "keywords": [
+    "json-diff-audit",
+    "audit",
+    "json-diff"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
