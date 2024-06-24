@@ -1,8 +1,11 @@
-const auditEventTransformer = require("../lib/auditEventTransformer")
+const { auditEventTransformer } = require("../lib/index")
 
 describe("auditEventTransformer", () => {
   let assay1
   let assay2
+
+  let employee1
+  let employee2
 
   beforeEach(() => {
     assay1 = {
@@ -168,6 +171,46 @@ describe("auditEventTransformer", () => {
       },
       userId: "cnpeyt",
     }
+
+    employee1 = {
+      date: "04-18-2024 3:47:2 pm",
+      record: {
+        id: "12345",
+        name: {
+          first: "sam",
+          last: "smith",
+        },
+        type: "full",
+        address: [
+          {
+            type: "work",
+            zip: "63146",
+          },
+        ],
+        department: [{ location: [{ manager: [{ id: "jx8181", line: "4" }] }] }],
+      },
+      userId: "bl7483",
+    }
+
+    employee2 = {
+      date: "04-18-2024 3:47:2 pm",
+      record: {
+        id: "12345",
+        name: {
+          first: "sam",
+          last: "smith",
+        },
+        type: "full",
+        address: [
+          {
+            type: "work",
+            zip: "63146",
+          },
+        ],
+        department: [{ location: [{ manager: [{ id: "jx8181", line: "4" }] }] }],
+      },
+      userId: "am9912",
+    }
   })
 
   test("null event array returns empty array", async () => {
@@ -183,280 +226,282 @@ describe("auditEventTransformer", () => {
   })
 
   test("handles diff where no changes are detected between objects", async () => {
-    const temp = auditEventTransformer.process([assay1, assay1], "assay")
+    const temp = auditEventTransformer.process([employee1, employee1], "record")
 
     expect(temp).toEqual([])
   })
 
   test("top level field change", async () => {
-    assay2.assay.technology = "SASI"
+    employee2.record.id = "123456789"
 
-    const temp = auditEventTransformer.process([assay1, assay2], "assay")
+    const temp = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(temp).toEqual([
       {
         action: "update",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "technology",
-        newValue: "SASI",
-        oldValue: "Taqman",
-        user: "cnpeyt",
-        path: "technology",
+        field: "id",
+        newValue: "123456789",
+        oldValue: "12345",
+        user: "am9912",
+        path: "id",
       },
     ])
   })
 
   test("add single top level field", async () => {
-    assay2.assay.tissueType = "Pooled Leaf"
+    employee2.record.foo = "bar"
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
     expect(result).toEqual([
-      {
-        action: "add",
-        dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "tissueType",
-        newValue: "Pooled Leaf",
-        user: "cnpeyt",
-        path: "tissueType",
-      },
-    ])
-  })
-
-  test("add multiple top level field", async () => {
-    assay2.assay.tissueType = "Pooled Leaf"
-    assay2.assay.foo = "bar"
-
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
-    expect(result).toEqual([
-      {
-        action: "add",
-        dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "tissueType",
-        newValue: "Pooled Leaf",
-        user: "cnpeyt",
-        path: "tissueType",
-      },
       {
         action: "add",
         dateAndTime: "04-18-2024 3:47:2 pm",
         field: "foo",
         newValue: "bar",
-        user: "cnpeyt",
+        user: "am9912",
         path: "foo",
       },
     ])
   })
 
-  test("delete single top level field", async () => {
-    delete assay2.assay.assayType
+  test("add multiple top level field", async () => {
+    employee2.record.foo = "bar"
+    employee2.record.active = true
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
+    expect(result).toEqual([
+      {
+        action: "add",
+        dateAndTime: "04-18-2024 3:47:2 pm",
+        field: "foo",
+        newValue: "bar",
+        user: "am9912",
+        path: "foo",
+      },
+      {
+        action: "add",
+        dateAndTime: "04-18-2024 3:47:2 pm",
+        field: "active",
+        newValue: true,
+        user: "am9912",
+        path: "active",
+      },
+    ])
+  })
+
+  test("delete single top level field", async () => {
+    delete employee2.record.type
+
+    const result = auditEventTransformer.process([employee1, employee2], "record")
     expect(result).toEqual([
       {
         action: "delete",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "assayType",
-        oldValue: "Event Specific",
-        user: "cnpeyt",
-        path: "assayType",
+        field: "type",
+        oldValue: "full",
+        user: "am9912",
+        path: "type",
       },
     ])
   })
 
   test("delete multiple top level field", async () => {
-    delete assay2.assay.assayType
-    delete assay2.assay.technology
+    delete employee2.record.type
+    delete employee2.record.id
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
     expect(result).toEqual([
       {
         action: "delete",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "assayType",
-        oldValue: "Event Specific",
-        user: "cnpeyt",
-        path: "assayType",
+        field: "id",
+        oldValue: "12345",
+        user: "am9912",
+        path: "id",
       },
       {
         action: "delete",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "technology",
-        oldValue: "Taqman",
-        user: "cnpeyt",
-        path: "technology",
+        field: "type",
+        oldValue: "full",
+        user: "am9912",
+        path: "type",
       },
     ])
   })
 
   test("multiple top level fields change", async () => {
-    assay2.assay.technology = "SASI"
-    assay2.assay.scientificName = " tacos"
+    employee2.record.id = "98765"
+    employee2.record.type = "part"
 
-    const temp = auditEventTransformer.process([assay1, assay2], "assay")
+    const temp = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(temp).toEqual([
       {
         action: "update",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "scientificName",
-        newValue: " tacos",
-        oldValue: "Gossypium hirsutum",
-        user: "cnpeyt",
-        path: "scientificName",
+        field: "id",
+        newValue: "98765",
+        oldValue: "12345",
+        user: "am9912",
+        path: "id",
       },
       {
         action: "update",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "technology",
-        newValue: "SASI",
-        oldValue: "Taqman",
-        user: "cnpeyt",
-        path: "technology",
+        field: "type",
+        newValue: "part",
+        oldValue: "full",
+        user: "am9912",
+        path: "type",
       },
     ])
   })
 
   test("multiple top level fields change over different times", async () => {
-    assay2.assay.technology = "SASI"
-    const assay3 = {}
-    assay3.assay = { ...assay2.assay }
-    assay3.assay.scientificName = "spaghetti"
-    assay3.date = "04-20-2024 4:41:2 pm"
-    assay3.userId = "cnpeyt"
+    employee2.record.id = "98765"
 
-    const temp = auditEventTransformer.process([assay1, assay2, assay3], "assay")
+    const employee3 = {}
+    employee3.record = { ...employee2.record }
+    employee3.record.type = "part"
+    employee3.date = "04-20-2024 4:41:2 pm"
+    employee3.userId = "jt6137"
+
+    const temp = auditEventTransformer.process([employee1, employee2, employee3], "record")
 
     expect(temp).toEqual([
       {
         action: "update",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "technology",
-        newValue: "SASI",
-        oldValue: "Taqman",
-        user: "cnpeyt",
-        path: "technology",
+        field: "id",
+        newValue: "98765",
+        oldValue: "12345",
+        user: "am9912",
+        path: "id",
       },
       {
         action: "update",
         dateAndTime: "04-20-2024 4:41:2 pm",
-        field: "scientificName",
-        newValue: "spaghetti",
-        oldValue: "Gossypium hirsutum",
-        user: "cnpeyt",
-        path: "scientificName",
+        field: "type",
+        newValue: "part",
+        oldValue: "full",
+        user: "jt6137",
+        path: "type",
       },
     ])
   })
 
   test("handles nested lab field changes", async () => {
-    assay2.assay.labs[0].sop = "BQ-QC-21240x"
-    assay2.assay.labs[0].apiId = "labs/st-louis-r-and-d-genotyping-labsx"
-    assay2.assay.labs[1] = { foo: "bar" }
+    employee2.record.address[0].type = "home"
+    employee2.record.address[0].zip = "63101"
+    employee2.record.address[1] = { type: "remote" }
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
         action: "update",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "sop",
-        newValue: "BQ-QC-21240x",
-        oldValue: "BQ-QC-21240",
-        user: "cnpeyt",
-        path: "labs[0].sop",
+        field: "type",
+        newValue: "home",
+        oldValue: "work",
+        user: "am9912",
+        path: "address[0].type",
       },
       {
         action: "update",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "apiId",
-        newValue: "labs/st-louis-r-and-d-genotyping-labsx",
-        oldValue: "labs/st-louis-r-and-d-genotyping-labs",
-        user: "cnpeyt",
-        path: "labs[0].apiId",
+        field: "zip",
+        newValue: "63101",
+        oldValue: "63146",
+        user: "am9912",
+        path: "address[0].zip",
       },
       {
         action: "add",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "foo",
-        newValue: "bar",
-        user: "cnpeyt",
-        path: "labs[1].foo",
+        field: "type",
+        newValue: "remote",
+        user: "am9912",
+        path: "address[1].type",
       },
     ])
   })
 
   test("handles deep nested field update", async () => {
-    assay2.assay.markers[0].alleles[0].primers[0].name = "abc"
+    employee2.record.department[0].location[0].manager[0].id = "ps2127"
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
         action: "update",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "name",
-        newValue: "abc",
-        oldValue: "IC-acp",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[0].name",
+        field: "id",
+        newValue: "ps2127",
+        oldValue: "jx8181",
+        user: "am9912",
+        path: "department[0].location[0].manager[0].id",
       },
     ])
   })
-  test("handles deep nested field addition", async () => {
-    assay2.assay.markers[0].alleles[0].primers[0].temp = "birds"
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+  test("handles deep nested field addition", async () => {
+    employee2.record.department[0].location[0].manager[0].office = "33b"
+
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
         action: "add",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "temp",
-        newValue: "birds",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[0].temp",
+        field: "office",
+        newValue: "33b",
+        user: "am9912",
+        path: "department[0].location[0].manager[0].office",
       },
     ])
   })
 
   test("handles deep nested object addition", async () => {
-    assay2.assay.markers[0].alleles[0].primers[2] = { foo: "bar", temp: "hot" }
+    employee2.record.department[0].location[0].manager[1] = { floor: "3", room: "33b" }
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
         action: "add",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "foo",
-        newValue: "bar",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[2].foo",
+        field: "floor",
+        newValue: "3",
+        user: "am9912",
+        path: "department[0].location[0].manager[1].floor",
       },
       {
         action: "add",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "temp",
-        newValue: "hot",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[2].temp",
+        field: "room",
+        newValue: "33b",
+        user: "am9912",
+        path: "department[0].location[0].manager[1].room",
       },
     ])
   })
 
   test("handles deep nested field deletion", async () => {
-    delete assay2.assay.markers[0].alleles[0].primers[0].name
+    delete employee2.record.department[0].location[0].manager[0].line
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
         action: "delete",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "name",
-        oldValue: "IC-acp",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[0].name",
+        field: "line",
+        oldValue: "4",
+        user: "am9912",
+        path: "department[0].location[0].manager[0].line",
       },
     ])
   })
