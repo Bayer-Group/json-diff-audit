@@ -673,65 +673,71 @@ describe("auditEventTransformer", () => {
   })
 
   test("handles null values null values on value updates", () => {
-    assay1.assay.labs[0].assayStatusInactiveReason = null
-    assay2.assay.labs[0].assayStatusInactiveReason = "Redesign"
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    employee1.record.department[0].location[0].manager[0].line = null
+    employee2.record.department[0].location[0].manager[0].line = "9"
+
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "update",
-        field: "assayStatusInactiveReason",
+        field: "line",
         oldValue: null,
-        newValue: "Redesign",
-        path: "labs[0].assayStatusInactiveReason",
+        newValue: "9",
+        path: "department[0].location[0].manager[0].line",
       },
     ])
   })
 
   test("generates add + delete event when fields are removed and added", async () => {
-    delete assay2.assay.markers[0].alleles[1].primers[1]
-    assay2.assay.markers[0].alleles[1].primers[1] = {
-      name: "RB116",
-      sequence: "AAGAGCGAATTTGGCCTGTAGA",
-    }
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    delete employee2.record.address[0]
+    employee2.record.address[0] = { type: "home", zip: "63304", name: "blah" }
+
+    // delete assay2.assay.markers[0].alleles[1].primers[1]
+    // assay2.assay.markers[0].alleles[1].primers[1] = {
+    //   name: "RB116",
+    //   sequence: "AAGAGCGAATTTGGCCTGTAGA",
+    // }
+
+    // const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "delete",
-        field: "name",
-        oldValue: "GH_S21911353R  ",
-        path: "markers[0].alleles[1].primers[1].name",
+        field: "type",
+        oldValue: "work",
+        path: "employee2.record.address[0].type",
       },
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "delete",
-        field: "sequence",
-        oldValue: "TGGTGTGAAAGGAACAATCAGTTG ",
-        path: "markers[0].alleles[1].primers[1].sequence",
+        field: "zip",
+        oldValue: "",
+        path: "employee2.record.address[0].zip",
       },
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "add",
-        field: "name",
-        newValue: "RB116",
-        path: "markers[0].alleles[1].primers[2].name",
+        field: "type",
+        newValue: "home",
+        path: "employee2.record.address[0].type",
       },
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "add",
-        field: "sequence",
-        newValue: "AAGAGCGAATTTGGCCTGTAGA",
-        path: "markers[0].alleles[1].primers[2].sequence",
+        field: "zip",
+        newValue: "63304",
+        path: "employee2.record.address[0].zip",
       },
     ])
   })
