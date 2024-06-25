@@ -187,7 +187,18 @@ describe("auditEventTransformer", () => {
             zip: "63146",
           },
         ],
-        department: [{ location: [{ manager: [{ id: "jx8181", line: "4" }] }] }],
+        department: [
+          {
+            location: [
+              {
+                manager: [
+                  { id: "jx8181", line: "4", phone: [{ area: "314", npa: "667" }] },
+                  { id: "tk2310", line: "3" },
+                ],
+              },
+            ],
+          },
+        ],
       },
       userId: "bl7483",
     }
@@ -207,7 +218,18 @@ describe("auditEventTransformer", () => {
             zip: "63146",
           },
         ],
-        department: [{ location: [{ manager: [{ id: "jx8181", line: "4" }] }] }],
+        department: [
+          {
+            location: [
+              {
+                manager: [
+                  { id: "jx8181", line: "4", phone: [{ area: "314", npa: "667" }] },
+                  { id: "tk2310", line: "3" },
+                ],
+              },
+            ],
+          },
+        ],
       },
       userId: "am9912",
     }
@@ -465,7 +487,7 @@ describe("auditEventTransformer", () => {
   })
 
   test("handles deep nested object addition", async () => {
-    employee2.record.department[0].location[0].manager[1] = { floor: "3", room: "33b" }
+    employee2.record.department[0].location[0].manager[2] = { floor: "3", room: "33b" }
 
     const result = auditEventTransformer.process([employee1, employee2], "record")
 
@@ -476,7 +498,7 @@ describe("auditEventTransformer", () => {
         field: "floor",
         newValue: "3",
         user: "am9912",
-        path: "department[0].location[0].manager[1].floor",
+        path: "department[0].location[0].manager[2].floor",
       },
       {
         action: "add",
@@ -484,7 +506,7 @@ describe("auditEventTransformer", () => {
         field: "room",
         newValue: "33b",
         user: "am9912",
-        path: "department[0].location[0].manager[1].room",
+        path: "department[0].location[0].manager[2].room",
       },
     ])
   })
@@ -507,140 +529,145 @@ describe("auditEventTransformer", () => {
   })
 
   test("handles deep nested object deletion", async () => {
-    delete assay2.assay.markers[0].alleles[0].primers[1]
+    delete employee2.record.department[0].location[0].manager[1]
+    // delete assay2.assay.markers[0].alleles[0].primers[1]
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
         action: "delete",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "name",
-        oldValue: "IC-acp",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[1].name",
+        field: "id",
+        oldValue: "tk2310",
+        user: "am9912",
+        path: "department[0].location[0].manager[1].id",
       },
       {
         action: "delete",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "sequence",
-        oldValue: "GAAGAAGCACCCTCTCATTTACG",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[1].sequence",
+        field: "line",
+        oldValue: "3",
+        user: "am9912",
+        path: "department[0].location[0].manager[1].line",
       },
     ])
   })
+
   test("handles deep nested changes across multiple iterations", async () => {
-    delete assay2.assay.markers[0].alleles[0].primers[1]
-    const assay3 = {}
-    assay3.assay = JSON.parse(JSON.stringify(assay2.assay))
-    assay3.date = "04-20-2024 4:41:2 pm"
-    assay3.userId = "gkkqy"
-    assay3.assay.markers[0].alleles[2] = { foo: "bar", temp: "hot" }
-    const result = auditEventTransformer.process([assay1, assay2, assay3], "assay")
+    delete employee2.record.department[0].location[0].manager[1]
+
+    const employee3 = {}
+    employee3.record = JSON.parse(JSON.stringify(employee2.record))
+    employee3.date = "04-20-2024 4:41:2 pm"
+    employee3.userId = "mm3434"
+    employee3.record.department[0].location[1] = { type: "building", zip: "87123" }
+
+    const result = auditEventTransformer.process([employee1, employee2, employee3], "record")
 
     expect(result).toEqual([
       {
         action: "delete",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "name",
-        oldValue: "IC-acp",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[1].name",
+        field: "id",
+        oldValue: "tk2310",
+        user: "am9912",
+        path: "department[0].location[0].manager[1].id",
       },
       {
         action: "delete",
         dateAndTime: "04-18-2024 3:47:2 pm",
-        field: "sequence",
-        oldValue: "GAAGAAGCACCCTCTCATTTACG",
-        user: "cnpeyt",
-        path: "markers[0].alleles[0].primers[1].sequence",
+        field: "line",
+        oldValue: "3",
+        user: "am9912",
+        path: "department[0].location[0].manager[1].line",
       },
       {
         action: "add",
         dateAndTime: "04-20-2024 4:41:2 pm",
-        field: "foo",
-        newValue: "bar",
-        user: "gkkqy",
-        path: "markers[0].alleles[2].foo",
+        field: "type",
+        newValue: "building",
+        user: "mm3434",
+        path: "department[0].location[1].type",
       },
       {
         action: "add",
         dateAndTime: "04-20-2024 4:41:2 pm",
-        field: "temp",
-        newValue: "hot",
-        user: "gkkqy",
-        path: "markers[0].alleles[2].temp",
+        field: "zip",
+        newValue: "87123",
+        user: "mm3434",
+        path: "department[0].location[1].zip",
       },
     ])
   })
 
+  // Jared - change manager index to 1 and run the test, check the exception
   test("handles deep nested object additions", async () => {
-    assay2.assay.markers[0].alleles[3] = { abc: "123" }
-    assay2.assay.markers[0].alleles[3].primers = [{ key: "value" }]
-    assay2.assay.markers[0].alleles[3].primers[0].data = [{ help: "me" }]
+    employee2.record.department[0].location[0].manager[2] = { floor: "3", room: "33b" }
+    employee2.record.department[0].location[0].manager[2].phone = [{ area: "314" }]
+    // employee2.record.department[0].location[0].manager[1].phone[0].status = [{ active: true }]
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+    // assay2.assay.markers[0].alleles[3] = { abc: "123" }
+    // assay2.assay.markers[0].alleles[3].primers = [{ key: "value" }]
+    // assay2.assay.markers[0].alleles[3].primers[0].data = [{ help: "me" }]
+
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "add",
-        field: "abc",
-        newValue: "123",
-        path: "markers[0].alleles[3].abc",
+        field: "floor",
+        newValue: "3",
+        path: "department[0].location[0].manager[1].floor",
       },
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "add",
-        field: "key",
-        newValue: "value",
-        path: "markers[0].alleles[3].primers[0].key",
-      },
-      {
-        user: "cnpeyt",
-        dateAndTime: "04-18-2024 3:47:2 pm",
-        action: "add",
-        field: "help",
-        newValue: "me",
-        path: "markers[0].alleles[3].primers[0].data[0].help",
+        field: "room",
+        newValue: "33b",
+        path: "department[0].location[0].manager[1].room",
       },
     ])
   })
-  test("handles deep nested object deletions", async () => {
-    delete assay2.assay.markers[0].alleles[1].probeDye
-    delete assay2.assay.markers[0].alleles[1].primers[1]
 
-    const result = auditEventTransformer.process([assay1, assay2], "assay")
+  test("handles deep nested object deletions", async () => {
+    delete employee2.record.department[0].location[0].manager[0].line
+    delete employee2.record.department[0].location[0].manager[0].phone[0]
+
+    // delete assay2.assay.markers[0].alleles[1].probeDye
+    // delete assay2.assay.markers[0].alleles[1].primers[1]
+
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
     console.info("result", result)
 
     expect(result).toEqual([
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "delete",
-        field: "probeDye",
-        oldValue: "6fam",
-        path: "markers[0].alleles[1].probeDye",
+        field: "line",
+        oldValue: "4",
+        path: "department[0].location[0].manager[0].line",
       },
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "delete",
-        field: "name",
-        oldValue: "GH_S21911353R  ",
-        path: "markers[0].alleles[1].primers[1].name",
+        field: "area",
+        oldValue: "314",
+        path: "department[0].location[0].manager[0].phone[0].area",
       },
       {
-        user: "cnpeyt",
+        user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "delete",
-        field: "sequence",
-        oldValue: "TGGTGTGAAAGGAACAATCAGTTG ",
-        path: "markers[0].alleles[1].primers[1].sequence",
+        field: "npa",
+        oldValue: "667",
+        path: "department[0].location[0].manager[0].phone[0].npa",
       },
     ])
   })
