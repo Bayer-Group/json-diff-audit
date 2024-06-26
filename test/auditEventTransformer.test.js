@@ -199,6 +199,18 @@ describe("auditEventTransformer", () => {
             ],
           },
         ],
+        personal: [
+          {
+            favorite: [
+              {
+                food: [
+                  { name: "pizza", rank: 1 },
+                  { name: "hamburger", rank: 2 },
+                ],
+              },
+            ],
+          },
+        ],
       },
       userId: "bl7483",
     }
@@ -225,6 +237,18 @@ describe("auditEventTransformer", () => {
                 manager: [
                   { id: "jx8181", line: "4", phone: [{ area: "314", npa: "667" }] },
                   { id: "tk2310", line: "3" },
+                ],
+              },
+            ],
+          },
+        ],
+        personal: [
+          {
+            favorite: [
+              {
+                food: [
+                  { name: "pizza", rank: 1 },
+                  { name: "hamburger", rank: 2 },
                 ],
               },
             ],
@@ -673,7 +697,6 @@ describe("auditEventTransformer", () => {
   })
 
   test("handles null values null values on value updates", () => {
-
     employee1.record.department[0].location[0].manager[0].line = null
     employee2.record.department[0].location[0].manager[0].line = "9"
 
@@ -692,18 +715,10 @@ describe("auditEventTransformer", () => {
     ])
   })
 
-  test("generates add + delete event when fields are removed and added", async () => {
+  test("generates add + delete event when fields are removed and added with identical object", async () => {
+    delete employee2.record.personal[0].favorite[0].food[1]
+    employee2.record.personal[0].favorite[0].food[1] = { name: "pizza", rank: 1 }
 
-    delete employee2.record.address[0]
-    employee2.record.address[0] = { type: "home", zip: "63304", name: "blah" }
-
-    // delete assay2.assay.markers[0].alleles[1].primers[1]
-    // assay2.assay.markers[0].alleles[1].primers[1] = {
-    //   name: "RB116",
-    //   sequence: "AAGAGCGAATTTGGCCTGTAGA",
-    // }
-
-    // const result = auditEventTransformer.process([assay1, assay2], "assay")
     const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
@@ -711,193 +726,61 @@ describe("auditEventTransformer", () => {
         user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "delete",
-        field: "type",
-        oldValue: "work",
-        path: "employee2.record.address[0].type",
+        field: "name",
+        oldValue: "hamburger",
+        path: "personal[0].favorite[0].food[1].name",
       },
       {
         user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "delete",
-        field: "zip",
-        oldValue: "",
-        path: "employee2.record.address[0].zip",
+        field: "rank",
+        oldValue: 2,
+        path: "personal[0].favorite[0].food[1].rank",
       },
       {
         user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "add",
-        field: "type",
-        newValue: "home",
-        path: "employee2.record.address[0].type",
+        field: "name",
+        newValue: "pizza",
+        path: "personal[0].favorite[0].food[1].name",
       },
       {
         user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
         action: "add",
-        field: "zip",
-        newValue: "63304",
-        path: "employee2.record.address[0].zip",
+        field: "rank",
+        newValue: 1,
+        path: "personal[0].favorite[0].food[1].rank",
       },
     ])
   })
 
-  test("employees", async () => {
-    const employee1 = {
-      name: "Derek Smith",
-      status: "Full Time",
-      id: "012378409",
-      address: [
-        {
-          street: "123 main st",
-          city: "St Louis",
-          zip: "63191",
-          type: "home",
-        },
-        {
-          street: "800 Tines",
-          city: "St Louis",
-          zip: "63001",
-          type: "work",
-        },
-      ],
-    }
+  test("generates update events when fields are removed and added with different object", async () => {
+    delete employee2.record.personal[0].favorite[0].food[1]
+    employee2.record.personal[0].favorite[0].food[1] = { name: "sushi", rank: 3 }
 
-    const employee2 = {
-      name: "Derek Smith",
-      status: "Full Time",
-      id: "012378409",
-      address: [
-        {
-          street: "777 main st",
-          city: "St Louis",
-          zip: "63191",
-          type: "home",
-        },
-        {
-          street: "800 Tines",
-          city: "St Louis",
-          zip: "63001",
-          type: "work",
-        },
-      ],
-      phone: [{ type: "cell", number: "3145551212" }],
-    }
+    const result = auditEventTransformer.process([employee1, employee2], "record")
 
-    const temp = auditEventTransformer.process(
-      [
-        { userId: "Bob", date: "04-18-2024 3:47:2 pm", employee: employee1 },
-        { userId: "Kim", date: "04-21-2024 3:47:2 pm", employee: employee2 },
-      ],
-      "employee"
-    )
-
-    expect(temp).toEqual([
+    expect(result).toEqual([
       {
-        action: "add",
-        dateAndTime: "04-21-2024 3:47:2 pm",
-        field: "type",
-        newValue: "cell",
-        user: "Kim",
-        path: "phone[0].type",
-      },
-      {
-        action: "add",
-        dateAndTime: "04-21-2024 3:47:2 pm",
-        field: "number",
-        newValue: "3145551212",
-        user: "Kim",
-        path: "phone[0].number",
-      },
-      {
+        user: "am9912",
+        dateAndTime: "04-18-2024 3:47:2 pm",
         action: "update",
-        dateAndTime: "04-21-2024 3:47:2 pm",
-        field: "street",
-        newValue: "777 main st",
-        oldValue: "123 main st",
-        user: "Kim",
-        path: "address[0].street",
-      },
-    ])
-  })
-
-  test("employees 2", async () => {
-    const employee1 = {
-      name: "Derek Smith",
-      status: "Full Time",
-      id: "012378409",
-      address: [
-        {
-          street: "123 main st",
-          city: "St Louis",
-          zip: "63191",
-          type: "home",
-        },
-        {
-          street: "800 Tines",
-          city: "St Louis",
-          zip: "63001",
-          type: "work",
-        },
-      ],
-      phone: [{ type: "cell", number: "3145551212" }],
-    }
-
-    const employee2 = {
-      name: "Derek Smith",
-      status: "Full Time",
-      id: "012378409",
-      address: [
-        {
-          street: "777 main st",
-          city: "St Louis",
-          zip: "63191",
-          type: "home",
-        },
-        {
-          street: "800 Tines",
-          city: "St Louis",
-          zip: "63001",
-          type: "work",
-        },
-      ],
-    }
-
-    const temp = auditEventTransformer.process(
-      [
-        { userId: "Bob", date: "04-18-2024 3:47:2 pm", employee: employee1 },
-        { userId: "Kim", date: "04-21-2024 3:47:2 pm", employee: employee2 },
-      ],
-      "employee"
-    )
-
-    console.info("temp", temp)
-
-    expect(temp).toEqual([
-      {
-        action: "delete",
-        dateAndTime: "04-21-2024 3:47:2 pm",
-        field: "type",
-        oldValue: "cell",
-        user: "Kim",
-        path: "phone[0].type",
+        field: "name",
+        oldValue: "hamburger",
+        newValue: "sushi",
+        path: "personal[0].favorite[0].food[1].name",
       },
       {
-        action: "delete",
-        dateAndTime: "04-21-2024 3:47:2 pm",
-        field: "number",
-        oldValue: "3145551212",
-        user: "Kim",
-        path: "phone[0].number",
-      },
-      {
+        user: "am9912",
+        dateAndTime: "04-18-2024 3:47:2 pm",
         action: "update",
-        dateAndTime: "04-21-2024 3:47:2 pm",
-        field: "street",
-        newValue: "777 main st",
-        oldValue: "123 main st",
-        user: "Kim",
-        path: "address[0].street",
+        field: "rank",
+        oldValue: 2,
+        newValue: 3,
+        path: "personal[0].favorite[0].food[1].rank",
       },
     ])
   })
