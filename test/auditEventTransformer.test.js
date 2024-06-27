@@ -785,6 +785,37 @@ describe("auditEventTransformer", () => {
     ])
   })
 
+  test("flip array items", async () => {
+    // delete employee2.record.personal[0].favorite[0].food[0]
+    const temp = employee2.record.personal[0].favorite[0].food[0]
+    employee2.record.personal[0].favorite[0].food[0] =
+      employee2.record.personal[0].favorite[0].food[1]
+    employee2.record.personal[0].favorite[0].food[1] = temp
+
+    const result = auditEventTransformer.process([employee1, employee2], "record")
+
+    expect(result).toEqual([
+      {
+        user: "am9912",
+        dateAndTime: "04-18-2024 3:47:2 pm",
+        action: "update",
+        field: "name",
+        oldValue: "hamburger",
+        newValue: "sushi",
+        path: "personal[0].favorite[0].food[1].name",
+      },
+      {
+        user: "am9912",
+        dateAndTime: "04-18-2024 3:47:2 pm",
+        action: "update",
+        field: "rank",
+        oldValue: 2,
+        newValue: 3,
+        path: "personal[0].favorite[0].food[1].rank",
+      },
+    ])
+  })
+
   test("remove employees favorite color", async () => {
     const employee1 = {
       name: "Derek Smith",
