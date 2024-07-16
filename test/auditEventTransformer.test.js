@@ -681,8 +681,6 @@ describe("auditEventTransformer", () => {
 
     const result = auditEventTransformer.process([employee1, employee2], "record")
 
-    console.info("result", result)
-
     expect(result).toEqual([
       {
         user: "am9912",
