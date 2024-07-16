@@ -1,8 +1,8 @@
 const { auditEventTransformer } = require("../lib/index")
 
 describe("auditEventTransformer", () => {
-  let assay1
-  let assay2
+  // let assay1
+  // let assay2
 
   let employee1
   let employee2
@@ -627,17 +627,29 @@ describe("auditEventTransformer", () => {
 
   // Jared - change manager index to 1 and run the test, check the exception
   test("handles deep nested object additions", async () => {
-    employee2.record.department[0].location[0].manager[2] = { floor: "3", room: "33b" }
-    employee2.record.department[0].location[0].manager[2].phone = [{ area: "314" }]
+    employee2.record.department[0].location[0].manager[1] = { floor: "3", room: "33b" }
+    employee2.record.department[0].location[0].manager[1].phone = [{ area: "314" }]
     // employee2.record.department[0].location[0].manager[1].phone[0].status = [{ active: true }]
-
-    // assay2.assay.markers[0].alleles[3] = { abc: "123" }
-    // assay2.assay.markers[0].alleles[3].primers = [{ key: "value" }]
-    // assay2.assay.markers[0].alleles[3].primers[0].data = [{ help: "me" }]
 
     const result = auditEventTransformer.process([employee1, employee2], "record")
 
     expect(result).toEqual([
+      {
+        action: "delete",
+        dateAndTime: "04-18-2024 3:47:2 pm",
+        field: "id",
+        oldValue: "tk2310",
+        path: "department[0].location[0].manager[1].id",
+        user: "am9912",
+      },
+      {
+        action: "delete",
+        dateAndTime: "04-18-2024 3:47:2 pm",
+        field: "line",
+        oldValue: "3",
+        path: "department[0].location[0].manager[1].line",
+        user: "am9912",
+      },
       {
         user: "am9912",
         dateAndTime: "04-18-2024 3:47:2 pm",
@@ -653,6 +665,14 @@ describe("auditEventTransformer", () => {
         field: "room",
         newValue: "33b",
         path: "department[0].location[0].manager[1].room",
+      },
+      {
+        user: "am9912",
+        dateAndTime: "04-18-2024 3:47:2 pm",
+        action: "add",
+        field: "area",
+        newValue: "314",
+        path: "department[0].location[0].manager[1].phone[0].area",
       },
     ])
   })
