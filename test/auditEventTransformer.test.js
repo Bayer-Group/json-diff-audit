@@ -552,7 +552,6 @@ describe("auditEventTransformer", () => {
 
   test("handles deep nested object deletion", async () => {
     delete employee2.record.department[0].location[0].manager[1]
-    // delete assay2.assay.markers[0].alleles[0].primers[1]
 
     const result = auditEventTransformer.process([employee1, employee2], "record")
 
@@ -623,11 +622,9 @@ describe("auditEventTransformer", () => {
     ])
   })
 
-  // Jared - change manager index to 1 and run the test, check the exception
   test("handles deep nested object additions", async () => {
     employee2.record.department[0].location[0].manager[1] = { floor: "3", room: "33b" }
     employee2.record.department[0].location[0].manager[1].phone = [{ area: "314" }]
-    // employee2.record.department[0].location[0].manager[1].phone[0].status = [{ active: true }]
 
     const result = auditEventTransformer.process([employee1, employee2], "record")
 
