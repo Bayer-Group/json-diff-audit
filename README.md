@@ -78,10 +78,10 @@ by user mtimms on 04-21-2023 at 10:23:2 am.
 The input is a collection of records.  Each record should have 3 fields
 
 | Field | Description |
-    |------| ---- |
-    | userId | the user that made the changes to the current object    |
-    |  date | the date and time the change was made |
-    | < domain object > | the key name to the domain object that will be compared, defaults to 'data' |
+|------| ---- |
+| userId | the user that made the changes to the current object    |
+|  date | the date and time the change was made |
+| < domain object > | the key name to the domain object that will be compared, defaults to 'data' |
 
 
 The processing will compare each record in the collection to the next, they are assumed to be ordered by date.  A list of
