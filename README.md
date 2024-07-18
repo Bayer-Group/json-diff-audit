@@ -23,7 +23,7 @@ npm install json-diff-audit
 ### Node
 
 ```js
-const { auditEventTransformer } = require('json-diff-audir')
+const { auditEventTransformer } = require('json-diff-audit')
 
 const record1 = { 
   employee : {
