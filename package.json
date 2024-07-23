@@ -1,4 +1,8 @@
 {
+  "contributors": [
+    "Chris Peyton <chris.peyton@bayer.com",
+    "Jared Edler <jared.edler@bayer.com"
+  ],
   "name": "json-diff-audit",
   "version": "1.0.0",
   "description": "Detect changes and generate audit events for a series of JSON objects",
@@ -13,19 +17,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bayer-int/json-diff-audit.git"
+    "url": "https://github.com/xyz/json-diff-audit.git"
   },
   "keywords": [
     "json-diff-audit",
     "audit",
     "json-diff"
   ],
-  "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bayer-int/json-diff-audit/issues"
+    "url": "https://github.com/xyz/json-diff-audit/issues"
   },
-  "homepage": "https://github.com/bayer-int/json-diff-audit#readme",
+  "homepage": "https://github.com/xyz/json-diff-audit#readme",
   "dependencies": {
     "json-diff": "^1.0.6"
   },

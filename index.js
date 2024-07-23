@@ -1,4 +1,4 @@
-const auditEventTransformer = require("./auditEventTransformer")
+const auditEventTransformer = require("./lib/auditEventTransformer")
 
 module.exports = {
   auditEventTransformer,
