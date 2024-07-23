@@ -17,18 +17,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xyz/json-diff-audit.git"
+    "url": "https://github.com/Bayer-Group/json-diff-audit.git"
   },
   "keywords": [
     "json-diff-audit",
     "audit",
     "json-diff"
   ],
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/xyz/json-diff-audit/issues"
+    "url": "https://github.com/Bayer-Group/json-diff-audit/issues"
   },
-  "homepage": "https://github.com/xyz/json-diff-audit#readme",
+  "homepage": "https://github.com/Bayer-Group/json-diff-audit#readme",
   "dependencies": {
     "json-diff": "^1.0.6"
   },
