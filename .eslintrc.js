@@ -16,7 +16,6 @@ module.exports = {
       },
     ],
     "eol-last": "off",
-    // indent: ['error', 4],
     "max-len": ["error", 300],
     "require-jsdoc": "off",
     "valid-jsdoc": "off",
@@ -29,7 +28,7 @@ module.exports = {
       },
     ],
     semi: ["error", "never"],
-    "no-unused-vars": ["error", { varsIgnorePattern: "^_" }],
+    "no-unused-vars": ["error", { vars: "all", args: "after-used", varsIgnorePattern: "^_" }],
   },
   globals: {
     expect: true,
