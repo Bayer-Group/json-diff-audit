@@ -1,14 +1,17 @@
 # JSON diff audit
 
-The JSON diff audit library will compare a collection of domain json objects, determine the detlas, and then create
-a list of audit type records in easily readable format.  The result audit records can be used in audit report for
-users.
+json-diff-audit is a Node.js library that compares JSON objects consecutively, identifies differences, and generates detailed audit records for easy reporting and tracking changes.
+
 
 ## Table of Contents
 
 * [Install](#install)
 * [Usage](#usage)
     * [Node](#node)
+* [How it Works](#how-it-works)
+* [Logging](#logging)
+* [Notes](#notes)
+
 
 ## Install
 
@@ -52,7 +55,7 @@ console.info(JSON.stringify(result))
 
     auditEventTransformer.process(arg1, arg2) 
 
-    arg1:  Collection of domain objects to 
+    arg1:  Collection of domain objects to compare
 
     arg2:  Domain field for comparisons, defaults to "data"
 
@@ -60,13 +63,15 @@ console.info(JSON.stringify(result))
 
 ```JSON
 [
-  {"path":"name",
-  "user":"mtimms",
-  "dateAndTime":"04-21-2023 10:23:2 am",
-  "field":"name",
-  "action":"update",
-  "oldValue":"John Smith",
-  "newValue":"Jane Thomas"}
+  {
+    "path":"name",
+    "user":"mtimms",
+    "dateAndTime":"04-21-2023 10:23:2 am",
+    "field":"name",
+    "action":"update",
+    "oldValue":"John Smith",
+    "newValue":"Jane Thomas"
+  }
 ]
 ```
 
@@ -85,7 +90,7 @@ The input is a collection of records.  Each record should have 3 fields
 
 
 The processing will compare each record in the collection to the next, they are assumed to be ordered by date.  A list of
-deltas is calculated and turned into a collection of audit records.  Each audit record will contain the following fields
+deltas is calculated and turned into a collection of audit records.  Each audit record will contain the following fields:
 
 
 | Field | Description |
@@ -98,7 +103,9 @@ deltas is calculated and turned into a collection of audit records.  Each audit 
  | newValue | if an action is either an update or add, this field indicates the new value |
  | path | the full path in dot notation to the affected field |
 
-## Examples
+## Logging
+
+By default, json-diff-audit will only log errors encountered during it's function execution. Additional debugging output can be conditionally triggered by setting the environment variable `json_diff_audit__debug = true`.
 
 ## Notes
 

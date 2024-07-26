@@ -8,12 +8,13 @@
   "description": "Detect changes and generate audit events for a series of JSON objects",
   "main": "index.js",
   "scripts": {
-    "test": "audit__debug=true jest",
+    "test": "json_diff_audit__debug=true jest",
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "pretest": "npm run lint",
     "format": "prettier --config .prettierrc.json --write './**/@(*.js|*.ts|*.json)'"
+
   },
   "repository": {
     "type": "git",
